@@ -6,7 +6,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,4 +27,7 @@ public class PointTransaction {
 
     @JsonIgnore
     private boolean processed;
+
+    @JsonIgnore
+    int userId;
 }

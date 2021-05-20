@@ -21,6 +21,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class SpendPointsServiceTest {
+    
+    private static final int USER_ID = 1;
 
     @InjectMocks
     private SpendPointsService spendPointsService;
@@ -42,7 +44,7 @@ public class SpendPointsServiceTest {
 
     @Test
     public void spendPoints() {
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "DANNON", 300 ),
                 createTransaction( "UNILEVER", 200 ),
@@ -51,7 +53,7 @@ public class SpendPointsServiceTest {
                 createTransaction( "DANNON", 1000 )
             ) );
 
-        List<SpentPoint> spentPoints = spendPointsService.spendPoints( 5000 );
+        List<SpentPoint> spentPoints = spendPointsService.spendPoints(USER_ID, 5000 );
 
         assertNotNull( spentPoints );
 
@@ -69,27 +71,27 @@ public class SpendPointsServiceTest {
 
     @Test
     public void spendPoints_balanceTooSmall() {
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "DANNON", 300 ),
                 createTransaction( "UNILEVER", 200 )
             ) );
 
         assertThrows( IllegalArgumentException.class, () ->
-            spendPointsService.spendPoints( 5000 ) );
+            spendPointsService.spendPoints(USER_ID, 5000 ) );
     }
 
     @Test
     public void spendPoints_transactionPointsFullySpent() {
         ArgumentCaptor<PointTransaction> arg = ArgumentCaptor.forClass( PointTransaction.class );
 
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "DANNON", 300 ),
                 createTransaction( "UNILEVER", 200 )
             ) );
 
-        List<SpentPoint> spentPoints = spendPointsService.spendPoints( 300 );
+        List<SpentPoint> spentPoints = spendPointsService.spendPoints( USER_ID,300 );
 
         verify( pointTransactionRepository, times( 1 )).save(arg.capture());
 
@@ -102,13 +104,13 @@ public class SpendPointsServiceTest {
     public void spendPoints_transactionPointsLeftover() {
         ArgumentCaptor<PointTransaction> arg = ArgumentCaptor.forClass( PointTransaction.class );
 
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "DANNON", 300 ),
                 createTransaction( "UNILEVER", 200 )
             ) );
 
-        List<SpentPoint> spentPoints = spendPointsService.spendPoints( 400 );
+        List<SpentPoint> spentPoints = spendPointsService.spendPoints( USER_ID,400 );
 
         verify( pointTransactionRepository, times( 2 )).save(arg.capture());
         PointTransaction processedTransaction = arg.getValue();

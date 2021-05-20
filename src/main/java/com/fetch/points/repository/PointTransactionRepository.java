@@ -13,9 +13,9 @@ public interface PointTransactionRepository extends CrudRepository<PointTransact
     /**
      * @return A list of point transactions ordered by timestamp with the most recent timestamps first
      */
-    @Query("select pt from PointTransaction as pt where pt.processed = false order by pt.timestamp asc")
-    public List<PointTransaction> getUnprocessedTransactionsOrderedOldestFirst();
+    @Query("select pt from PointTransaction as pt where pt.userId = ?1 and pt.processed = false order by pt.timestamp asc")
+    public List<PointTransaction> getUnprocessedTransactionsOrderedOldestFirst(int userId);
 
-    @Query("select distinct pt.payer from PointTransaction as pt")
-    public List<String> getDistinctPayerNames();
+    @Query("select distinct pt.payer from PointTransaction as pt where pt.userId = ?1")
+    public List<String> getDistinctPayerNames(int userId);
 }

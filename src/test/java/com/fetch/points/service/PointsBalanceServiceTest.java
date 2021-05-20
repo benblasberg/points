@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 public class PointsBalanceServiceTest {
+    
+    private static final int USER_ID = 1;
 
     @InjectMocks
     private PointsBalanceService pointsBalanceService = new PointsBalanceService();
@@ -41,7 +43,7 @@ public class PointsBalanceServiceTest {
 
     @Test
     public void calculateBalance_all_positive() {
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "A", 200 ),
                 createTransaction( "B", 400 ),
@@ -49,7 +51,7 @@ public class PointsBalanceServiceTest {
                 createTransaction( "C", 100 )
             ) );
 
-        final Map<String, Integer> points = pointsBalanceService.calculateBalance();
+        final Map<String, Integer> points = pointsBalanceService.calculateBalance(USER_ID);
         assertNotNull( points );
         assertEquals( 700, points.get( "A" ) );
         assertEquals( 400, points.get( "B" ) );
@@ -58,7 +60,7 @@ public class PointsBalanceServiceTest {
 
     @Test
     public void calculateBalance_some_negative() {
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "A", 200 ),
                 createTransaction( "B", 400 ),
@@ -67,7 +69,7 @@ public class PointsBalanceServiceTest {
                 createTransaction( "A", -100 )
             ) );
 
-        final Map<String, Integer> points = pointsBalanceService.calculateBalance();
+        final Map<String, Integer> points = pointsBalanceService.calculateBalance(USER_ID);
         assertNotNull( points );
         assertEquals( 600, points.get( "A" ) );
         assertEquals( 400, points.get( "B" ) );
@@ -76,7 +78,7 @@ public class PointsBalanceServiceTest {
 
     @Test
     public void calculateBalance_zeroBalance() {
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Arrays.asList(
                 createTransaction( "A", 200 ),
                 createTransaction( "B", 400 ),
@@ -84,10 +86,10 @@ public class PointsBalanceServiceTest {
                 createTransaction( "C", 100 )
             ) );
 
-        when( pointTransactionRepository.getDistinctPayerNames() )
+        when( pointTransactionRepository.getDistinctPayerNames(1) )
             .thenReturn( Arrays.asList( "A", "B", "C", "D" ) );
 
-        final Map<String, Integer> points = pointsBalanceService.calculateBalance();
+        final Map<String, Integer> points = pointsBalanceService.calculateBalance(USER_ID);
         assertNotNull( points );
         assertEquals( 700, points.get( "A" ) );
         assertEquals( 400, points.get( "B" ) );
@@ -98,10 +100,10 @@ public class PointsBalanceServiceTest {
 
     @Test
     public void calculateBalance_NoTransactions() {
-        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst())
+        when(pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(USER_ID))
             .thenReturn( Collections.emptyList() );
 
-        final Map<String, Integer> points = pointsBalanceService.calculateBalance();
+        final Map<String, Integer> points = pointsBalanceService.calculateBalance(USER_ID);
         assertNotNull( points );
         assertTrue( points.isEmpty() );
     }

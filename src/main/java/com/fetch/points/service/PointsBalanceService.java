@@ -15,9 +15,9 @@ public class PointsBalanceService {
     @Autowired
     private PointTransactionRepository pointTransactionRepository;
 
-    public Map<String, Integer> calculateBalance() {
+    public Map<String, Integer> calculateBalance(int userId) {
         final List<PointTransaction> transactions =
-            pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst();
+            pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(userId);
 
         final Map<String, Integer> totalsByPayer = new HashMap<>();
         for (PointTransaction pointTransaction : transactions) {
@@ -28,12 +28,12 @@ public class PointsBalanceService {
                         + pointTransaction.getPoints());
         }
 
-        addZeroBalancePayers( totalsByPayer );
+        addZeroBalancePayers( userId, totalsByPayer );
         return totalsByPayer;
     }
 
-    private void addZeroBalancePayers(final Map<String, Integer> totalsByPayer) {
-        pointTransactionRepository.getDistinctPayerNames()
+    private void addZeroBalancePayers(int userId, final Map<String, Integer> totalsByPayer) {
+        pointTransactionRepository.getDistinctPayerNames(userId)
             .stream()
             .filter( payer -> !totalsByPayer.containsKey( payer ) )
             .forEach( payer -> totalsByPayer.put( payer, 0 ) );

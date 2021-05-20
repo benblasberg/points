@@ -21,9 +21,9 @@ public class SpendPointsService {
     private PointTransactionRepository pointTransactionRepository;
 
     @Transactional
-    public List<SpentPoint> spendPoints(int pointsToSpend) {
+    public List<SpentPoint> spendPoints(int userId, int pointsToSpend) {
 
-        final List<PointTransaction> transactions = pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst();
+        final List<PointTransaction> transactions = pointTransactionRepository.getUnprocessedTransactionsOrderedOldestFirst(userId);
 
         final Map<String, Integer> pointsSpentByPayer = new HashMap<>();
 
